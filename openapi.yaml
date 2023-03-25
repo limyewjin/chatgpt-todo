@@ -4,7 +4,7 @@ info:
   description: A plugin that allows the user to create and manage a TODO list using ChatGPT. If you do not know the user's username, ask them first before making queries to the plugin. Otherwise, use the username "global".
   version: 'v1'
 servers:
-  - url: https://example.com
+  - url: https://PLUGIN_HOSTNAME
 paths:
   /todos/{username}:
     get:
@@ -17,6 +17,12 @@ paths:
             type: string
         required: true
         description: The name of the user.
+      - in: query
+        name: completed
+        schema:
+            type: boolean
+        required: false
+        description: Filter todos based on completion status. If not provided, returns all todos.
       responses:
         "200":
           description: OK
@@ -43,6 +49,7 @@ paths:
       responses:
         "200":
           description: OK
+  /todos/{username}/{todo_idx}:
     delete:
       operationId: deleteTodo
       summary: Delete a todo from the list
@@ -53,12 +60,12 @@ paths:
             type: string
         required: true
         description: The name of the user.
-      requestBody:
+      - in: path
+        name: todo_idx
+        schema:
+            type: integer
         required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/deleteTodoRequest'
+        description: The index of the todo to delete.
       responses:
         "200":
           description: OK
@@ -66,13 +73,16 @@ paths:
 components:
   schemas:
     getTodosResponse:
-      type: object
-      properties:
-        todos:
-          type: array
-          items:
+      type: array
+      items:
+        type: object
+        properties:
+          title:
             type: string
-          description: The list of todos.
+            description: The title of the todo item.
+          completed:
+            type: boolean
+            description: The completion status of the todo item.
     addTodoRequest:
       type: object
       required:
@@ -81,13 +91,4 @@ components:
         todo:
           type: string
           description: The todo to add to the list.
-          required: true
-    deleteTodoRequest:
-      type: object
-      required:
-      - todo_idx
-      properties:
-        todo_idx:
-          type: integer
-          description: The index of the todo to delete.
           required: true
